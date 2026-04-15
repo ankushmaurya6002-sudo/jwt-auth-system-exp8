@@ -6,8 +6,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const SECRET = "SECRET_KEY";
+// ✅ Use environment variable
+const SECRET = process.env.JWT_SECRET;
 
+// Dummy users (in-memory)
 const users = [
   { email: "admin@test.com", password: "123456", role: "admin" },
   { email: "user@test.com", password: "123456", role: "user" }
@@ -41,7 +43,7 @@ function verifyToken(req, res, next) {
   }
 }
 
-// 👑 RBAC
+// 👑 Role-based Access Control
 function authorizeRole(role) {
   return (req, res, next) => {
     if (req.user.role !== role)
@@ -62,7 +64,7 @@ app.post("/login", (req, res) => {
   res.json({ token });
 });
 
-// 🔒 Routes
+// 🔒 Protected Routes
 app.get("/dashboard", verifyToken, (req, res) => {
   res.json(req.user);
 });
@@ -75,4 +77,6 @@ app.get("/user", verifyToken, authorizeRole("user"), (req, res) => {
   res.send("User data");
 });
 
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+// ✅ Use Render PORT
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
